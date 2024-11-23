@@ -29,7 +29,7 @@ Validation: Zod
 Encryption: bcrypt for password hashing
 Installation and Setup
 1. Clone the Repository
-git clone https://github.com/yourusername/E-Commerce-Backend.git
+git clone https://github.com/SoloDevAbu/E-Commerce-Backend.git
 cd ecommerce-backend
 
 2. Install Dependencies
