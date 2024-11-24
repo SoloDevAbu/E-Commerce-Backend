@@ -3,22 +3,29 @@ const { Products, User } = require("../db");
 const addProductToCart = async (req, res) => {
     const productId = req.params.productId;
     const email = req.headers.email;
-    const quantity = req.body.quantity;
+    // const quantity = req.body.quantity;
 
     try {
-        const addProductToCart = await User.findOneAndUpdate({
+        const user = await User.findOneAndUpdate({
             email
         }, {
             $addToSet: {
-                cartItems: productId,
-                quantity: {
-                    quantity
-                }
+                cartItems: productId
             }
         })
+
+        // const cartItemIndex = user.cartItems.findIndex(item => item.productId.toString() === productId)
+        // if (cartItemIndex > 0) {
+        //     user.cartItems[cartItemIndex].quantity += quantity
+        // } else {
+        //     user.cartItems.push({
+        //         productId,
+        //         quantity
+        //     })
+        // }
         res.json({
             msg: "Product add successfully",
-            addProductToCart
+            products: user.cartItems
         })
     } catch (error) {
         res.status(500).json({
@@ -30,10 +37,13 @@ const addProductToCart = async (req, res) => {
 const allProductInCart = async (req, res) => {
     const email = req.headers.email;
     try {
-        const products = await Products.find({
+        const user = await User.findOne({
             email
-        }, {
-            $in: User.cartItems
+        })
+        const products = await Products.find({
+            _id: {
+                $in: user.cartItems
+            }
         })
         res.json({
             products
@@ -45,39 +55,48 @@ const allProductInCart = async (req, res) => {
     }
 }
 
-const updateProductInCart = async (req, res) => {
-    const productId = req.params.productId;
-    const quantity = req.body.quantity;
+//Implement this one latter
+// const updateProductInCart = async (req, res) => {
+//     const productId = req.params.productId;
+//     const quantity = req.body.quantity;
 
-    try {
-        const updatedProduct = User.findOneAndUpdate(
-            productId,{
-        }, {
-            $in: {
-                quantity: {
-                    quantity
-                }
-            }
-        })
-        res.json({
-            msg: "Quantity Updated",
-            quantity
-        })
-    } catch (error) {
-        res.status(500).json({
-            error: error.message
-        })
-    }
-}
+//     try {
+//         const updatedProduct = User.findOneAndUpdate(
+//             productId, {
+//         }, {
+//             $in: {
+//                 quantity: {
+//                     quantity
+//                 }
+//             }
+//         })
+//         res.json({
+//             msg: "Quantity Updated",
+//             quantity
+//         })
+//     } catch (error) {
+//         res.status(500).json({
+//             error: error.message
+//         })
+//     }
+// }
 
 const removeProductFromCart = async (req, res) => {
     const productId = req.params.productId;
+    const email = req.header.email;
     try {
-        const product = await User.findOneAndUpdate(productId, {
+        const user = await User.findOneAndUpdate({
+            email
+        }, {
             $pull: {
-                productId
+                cartItems: {
+                    productId
+                }
             }
-        })
+        },
+            { new: true }
+        );
+
         res.json({
             msg: "Product removed from cart successfully"
         })
@@ -91,6 +110,6 @@ const removeProductFromCart = async (req, res) => {
 module.exports = {
     addProductToCart,
     allProductInCart,
-    updateProductInCart,
+    // updateProductInCart,
     removeProductFromCart
 }

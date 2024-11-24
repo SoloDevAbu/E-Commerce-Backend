@@ -5,6 +5,7 @@ const adminSchema = zod.object({
     username: zod.string(2, "Username Required"),
     email: zod.string().email(),
     password: zod.string().min(6),
+    storename: zod.string(),
 })
 
 const registerAdmin = async (req, res) => {
@@ -17,31 +18,33 @@ const registerAdmin = async (req, res) => {
         })
     }
 
-    const { username, email, password } = validation.data;
+    const { username, email, password, storename } = validation.data;
 
     try {
         const admin = await Admin.create({
             username,
             email,
-            password
+            password,
+            storename
         })
         res.json({
             msg: "User created successfully"
         })
     } catch (error) {
         res.status(500).json({
-            msg: "email already exists"
+            error: error.message
         })
     }
 }
 
 const getAdminProfile = async (req, res) => {
     const {email, password} = req.headers;
+    const storename = req.body.storename;
 
     try {
         const admin = await Admin.findOne({
             email,
-            password
+            password,
         })
         if(!admin){
             res.json({
@@ -52,6 +55,7 @@ const getAdminProfile = async (req, res) => {
         res.json({
             user: admin.username,
             email: admin.email,
+            storename: storename
         })
     } catch (error) {
         res.status(500).json({
@@ -63,14 +67,15 @@ const getAdminProfile = async (req, res) => {
 
 const updateAdminProfile = async (req, res) => {
     const email = req.headers.email;
-    const {username, password} = req.body
+    const {username, password, storename} = req.body
 
     try {
         const updatedAdmin = await Admin.findOneAndUpdate({
             email
         }, {
             username,
-            password
+            password,
+            storename
         }, {
             new: true
         })
@@ -81,7 +86,7 @@ const updateAdminProfile = async (req, res) => {
             })
         }
         res.json({
-            msg: "Password Changed successfully"
+            msg: "Creadentials Changed successfully"
         })
 
     } catch (error) {

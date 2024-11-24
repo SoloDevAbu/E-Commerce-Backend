@@ -1,5 +1,5 @@
 const zod = require("zod");
-const { Products } = require("../db");
+const { Products, Admin } = require("../db");
 
 const ProductSchema = zod.object({
     title: zod.string(),
@@ -31,6 +31,7 @@ const getAllProduct = async (req, res) => {
 
 const createNewProduct = async (req, res) => {
     const validation = ProductSchema.safeParse(req.body);
+    const {email} = req.headers;
     if(!validation.success){
         return res.status(403).json({
             msg: "make sure everything is given as expected",
@@ -41,6 +42,7 @@ const createNewProduct = async (req, res) => {
     const {title, description, price, stock, category, image, tags} = validation.data
 
     try {
+        
         const product = await Products.create({
             title,
             description,
@@ -49,6 +51,13 @@ const createNewProduct = async (req, res) => {
             category,
             image,
             tags
+        })
+        const admin = await Admin.findOneAndUpdate({
+            email
+        }, {
+            $addToSet:{
+                products: product._id
+            }
         })
         res.json({
             msg: "Product created successfully"
@@ -89,12 +98,20 @@ const updateProductById = async (req, res) => {
 }
 
 const deleteProductById = async (req, res) => {
-    const productId = req.params.productId
+    const productId = req.params.productId;
+    const {email} = req.headers;
 
     try {
         const product = await Products.findByIdAndDelete(productId)
         res.json({
             msg: `Product deleted ${product}`
+        })
+        await Admin.findOneAndUpdate({
+            email,
+        }, {
+            $pull: {
+                products: product._id
+            }
         })
     } catch (error) {
         res.status(500).json({

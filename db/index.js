@@ -17,19 +17,15 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
     cartItems: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Products',
-        quantity: {
-            type: Number,
-            default: 0
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Products'
         }
     }],
     orderedItems: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Products',
-        quantity: {
-            type: Number,
-            default: 0
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Products'
         }
     }]
 }, { timestamps: true })
@@ -48,7 +44,7 @@ const AdminSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    storeName: {
+    storename: {
         type: String,
         required: true,
         unique: true
@@ -87,7 +83,7 @@ const ProductSchema = new mongoose.Schema({
     tags: [{
         type: String
     }],
-    
+
 }, { timestamps: true })
 
 const User = mongoose.model('User', UserSchema);
